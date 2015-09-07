@@ -1,4 +1,5 @@
-//My reconstruction of underscore.js for learning purposes
+//My reconstruction of underscore.js for learning purposes:
+//http://underscorejs.org/docs/underscore.htm
 console.log('D set up');
 
 (function(global){
@@ -41,6 +42,34 @@ console.log('D set up');
 
 	//1.3 Helper functions
 
+
+	//Internal function that returns an efficient version of the passed-in callback.
+	var optimizeCb = function(func, context, argCount){
+		if (context === void 0) return func; //note: void 0 returns 'undefined' 
+		switch (argCount == null? 3 : argCount){
+			//case where there is only one argument
+			case 1: return function(value){
+				return func.call(context, value);
+			};
+			//return a function which accepts two arguments
+			case 2: return function(value, other){
+				return func.call(context, value, other);
+			};
+			//return a function which accepts three arguments
+			case 3: return function(value, index, collection){
+				return func.call(context, value, index, collection);
+			};
+			case 4: return function(accumulator, value, index, collection){
+				return func.call(context, accumulator, value, index, collection);
+			}
+
+		}
+		return function(){
+			return func.apply(context, arguments);
+		};
+	};
+
+
 	//maker function returns a function which can look for the specific property 
 	var property = function(key){
 		return function(obj){
@@ -56,25 +85,36 @@ console.log('D set up');
 
 	//COLLECTING FUNCTIONS
 
+	//Iterates over a list of elements, yielding each in turn to an iteratee function.
+	//the iterate is bound to the context object (if one passed)
+	//Each invocation of iteratee is called with three args: (element, index, list)
+	//if LIST is a JS object, iteratee's arguments will be (value, key, list)
+	//this returns the list for chaining
+
 	d_.forEach = function(obj, iteratee, context){
 		var i;
 		var length;
+		iteratee = optimizeCb(iteratee, context);
 
+		//if the object passed is like an array
 		if (isArrayLike(obj)) {
 			for (i = 0, length = obj.length; i < length; i++){
 				iteratee(obj[i], i, obj);
 			}
 		}
+		//if the object passed does not have array characteristics
 		else {
+			//get the keys from the object
+			var keys = d_.keys(obj);
+			//iterate over every key in the object
+			for (i = 0, length = keys.length; i < length; i++){
+				iteratee(obj[keys[i]],keys[i], obj);
+			}
 
 		}
 		return obj;
 	}
 	
-
-
-
-
 
 
 
