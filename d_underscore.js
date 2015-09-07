@@ -83,7 +83,9 @@ console.log('D set up');
 		return typeof length === 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
 	}
 
-	//COLLECTING FUNCTIONS
+	//2. COLLECTING FUNCTIONS
+
+	//2.1 Each(object, iteratee, context)
 
 	//Iterates over a list of elements, yielding each in turn to an iteratee function.
 	//the iterate is bound to the context object (if one passed)
@@ -91,7 +93,7 @@ console.log('D set up');
 	//if LIST is a JS object, iteratee's arguments will be (value, key, list)
 	//this returns the list for chaining
 
-	d_.forEach = function(obj, iteratee, context){
+	d_.each = d_.forEach = function(obj, iteratee, context){
 		var i;
 		var length;
 		iteratee = optimizeCb(iteratee, context);
@@ -114,7 +116,88 @@ console.log('D set up');
 		}
 		return obj;
 	}
+
+	//2.2 map(list, iteratee, context)
+
+	//produces new array of values by performing iteratee on each item in the object
 	
+	d_.map = function(obj, iteratee, context){
+		
+		//iteratee will be passed the following:
+		//a) the value
+		//b) currentKey
+		//c) the object itself
+		iteratee = optimizeCb(iteratee,context);
+
+		//get the keys from the list
+		//if the list is NOT like an array, then keys = [all the enumerabe keys in the object]
+		var keys = !(isArrayLike(obj)) && d_.keys(obj);
+
+		//get the length of the list (we will use this to intialize an empty array)
+		var length = (keys || obj).length;
+		//create an empty array as long as the length of the list
+		var results = Array(length); 
+
+		//we loop over the array and add the functionality
+		for (var index = 0; index < length; index++){
+			//if the list has keys, we loop over the keys array to get the name of the property, 
+			//otherwise we just use a number
+			var currentKey = keys ? keys[index] : index;
+			results[index] = iteratee(obj[currentKey], currentKey, obj)
+		}
+		return results;
+
+	// }
+
+	// d_.find = d_.select = function(list,predicate, context){
+
+	// 	//if the list is an array
+
+	// 	if(isArrayLike(obj)){
+
+	// 		var length = list.length;
+	// 		for(var index = 0; index < length; index++){
+	// 			if predicate(list[index]) return true;
+	// 		}
+
+	// 	}
+
+		
+
+		//if the list is NOT an array
+
+	}
+
+	//3. ARRAY FUNCTIONS
+
+	//4. FUNCTION (AHEM) FUNCTIONS
+
+	//5. OBJECT FUNCTIONS
+
+	d_.isObject = function(obj){
+		var type = typeof obj;
+		// this returns TRUE if either one of the following holds:
+		//a) the argument OBJ is a function
+		//b) the argument has type 'object' AND the object is NOT falsy 
+		return type === 'function' || type === 'object' && !!obj;
+	}
+
+	//5.2 keys(object) returns an array with all the names of the enumerable properties
+	//in the object
+	//this is used by multiple functions, including d_.map in 2.1
+	d_.keys = function(obj){
+
+		//if the argument is not an object, return an empty array
+		if (!(d_.isObject(obj))) return [];
+
+		//use the native keys object if possible
+		if (Object.keys) return Object.keys(obj);
+
+		//add all the keys to an array
+
+		throw 'argument does not have Object.keys() native method';
+
+	};
 
 
 
